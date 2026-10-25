@@ -71,3 +71,37 @@ class LoginTests(APITestCase):
         for email in ("gestor2@empresa.com", "GESTOR2@EMPRESA.COM", " Gestor2@Empresa.com "):
             resposta = self.client.post(self.url, {"email": email, "password": self.SENHA})
             self.assertEqual(resposta.status_code, status.HTTP_200_OK, email)
+
+    def test_login_ignora_header_authorization_invalido(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Token invalido")
+
+        resposta = self.client.post(
+            self.url, {"email": "gestor@empresa.com", "password": self.SENHA}
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+
+    def test_login_com_token_de_usuario_inativado_e_reativado(self):
+        token = Token.objects.create(user=self.usuario)
+        self.usuario.is_active = False
+        self.usuario.save()
+        self.usuario.is_active = True
+        self.usuario.save()
+        self.client.credentials(HTTP_AUTHORIZATION=f"Token {token.key}")
+
+        resposta = self.client.post(
+            self.url, {"email": "gestor@empresa.com", "password": self.SENHA}
+        )
+
+        self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+
+    def test_login_devolve_o_perfil_de_cada_usuario(self):
+        for perfil in Usuario.Perfil:
+            with self.subTest(perfil=perfil):
+                email = f"perfil-{perfil.value.lower()}@empresa.com"
+                Usuario.objects.create_user(email, self.SENHA, perfil=perfil)
+
+                resposta = self.client.post(self.url, {"email": email, "password": self.SENHA})
+
+                self.assertEqual(resposta.status_code, status.HTTP_200_OK)
+                self.assertEqual(resposta.json()["perfil"], perfil.value)

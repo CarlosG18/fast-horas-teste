@@ -1,7 +1,7 @@
 """Views da API."""
 
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -17,6 +17,7 @@ def status_api(request: Request) -> Response:
 
 
 @api_view(["POST"])
+@authentication_classes([])  # token inválido/inativo no header não pode barrar o login
 @permission_classes([AllowAny])
 def login(request: Request) -> Response:
     """RF-001: autentica com e-mail e senha e devolve o token e o perfil."""
