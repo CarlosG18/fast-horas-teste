@@ -1,21 +1,47 @@
-"""
-Models da API.
+"""Models da API."""
 
-Crie aqui os models do domínio do projeto (nomes em português), por exemplo:
+from django.contrib.auth.models import AbstractUser, BaseUserManager
+from django.db import models
 
-    class Produto(models.Model):
-        nome = models.CharField("nome", max_length=100)
-        preco = models.DecimalField("preço", max_digits=10, decimal_places=2)
-        criado_em = models.DateTimeField("criado em", auto_now_add=True)
 
-        class Meta:
-            verbose_name = "produto"
-            verbose_name_plural = "produtos"
+class UsuarioManager(BaseUserManager):
+    use_in_migrations = True
 
-        def __str__(self):
-            return self.nome
+    def create_user(self, email, password=None, **extra):
+        if not email:
+            raise ValueError("O e-mail é obrigatório.")
+        usuario = self.model(email=email.strip().lower(), **extra)
+        usuario.set_password(password)
+        usuario.save(using=self._db)
+        return usuario
 
-Depois de criar ou alterar um model, rode `makemigrations` e `migrate`.
-"""
+    def create_superuser(self, email, password=None, **extra):
+        extra.setdefault("is_staff", True)
+        extra.setdefault("is_superuser", True)
+        extra.setdefault("perfil", Usuario.Perfil.CEO)
+        return self.create_user(email, password, **extra)
 
-from django.db import models  # noqa: F401
+
+class Usuario(AbstractUser):
+    """Usuário do Fast Horas: entra com e-mail e senha; `is_active` indica ativo/inativo."""
+
+    class Perfil(models.TextChoices):
+        CEO = "CEO", "CEO"
+        GESTOR = "GESTOR", "Gestor"
+        FUNCIONARIO = "FUNCIONARIO", "Funcionário"
+
+    username = None
+    email = models.EmailField("e-mail", unique=True)
+    perfil = models.CharField("perfil", max_length=12, choices=Perfil.choices)
+
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = []
+
+    objects = UsuarioManager()
+
+    class Meta:
+        verbose_name = "usuário"
+        verbose_name_plural = "usuários"
+
+    def __str__(self):
+        return self.email

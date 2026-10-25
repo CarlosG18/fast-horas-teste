@@ -1,12 +1,21 @@
-"""
-Registro dos models no Django Admin.
+"""Registro dos models no Django Admin."""
 
-Exemplo:
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 
-    @admin.register(Produto)
-    class ProdutoAdmin(admin.ModelAdmin):
-        list_display = ["nome", "preco", "criado_em"]
-        search_fields = ["nome"]
-"""
+from api.models import Usuario
 
-from django.contrib import admin  # noqa: F401
+
+@admin.register(Usuario)
+class UsuarioAdmin(UserAdmin):
+    ordering = ["email"]
+    list_display = ["email", "perfil", "is_active"]
+    search_fields = ["email"]
+    fieldsets = (
+        (None, {"fields": ("email", "password")}),
+        ("Perfil", {"fields": ("perfil", "first_name", "last_name")}),
+        ("Permissões", {"fields": ("is_active", "is_staff", "is_superuser")}),
+    )
+    add_fieldsets = (
+        (None, {"classes": ("wide",), "fields": ("email", "perfil", "password1", "password2")}),
+    )

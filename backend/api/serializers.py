@@ -1,16 +1,25 @@
-"""
-Serializers da API.
+"""Serializers da API."""
 
-Exemplo:
+from django.contrib.auth import authenticate
+from rest_framework import serializers
 
-    class ProdutoSerializer(serializers.ModelSerializer):
-        class Meta:
-            model = Produto
-            fields = ["id", "nome", "preco", "criado_em"]
-            read_only_fields = ["id", "criado_em"]
+MENSAGEM_LOGIN_INVALIDO = "E-mail ou senha incorretos."
 
-Regras de validação de negócio ficam aqui (métodos `validate_<campo>` ou
-`validate`), e não só no front-end.
-"""
 
-from rest_framework import serializers  # noqa: F401
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, trim_whitespace=False)
+
+    def validate_email(self, valor):
+        return valor.strip().lower()
+
+    def validate(self, attrs):
+        # authenticate() devolve None para senha errada e para usuário inativo (RF-003),
+        # com a mesma mensagem, para não revelar se o e-mail existe.
+        usuario = authenticate(
+            request=self.context.get("request"), email=attrs["email"], password=attrs["password"]
+        )
+        if usuario is None:
+            raise serializers.ValidationError(MENSAGEM_LOGIN_INVALIDO)
+        attrs["usuario"] = usuario
+        return attrs
