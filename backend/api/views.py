@@ -2,7 +2,7 @@
 
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 
@@ -26,3 +26,11 @@ def login(request: Request) -> Response:
     usuario = serializer.validated_data["usuario"]
     token, _ = Token.objects.get_or_create(user=usuario)
     return Response({"token": token.key, "perfil": usuario.perfil})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def logout(request: Request) -> Response:
+    """RF-002: encerra a sessão apagando o token; novo acesso exige login."""
+    request.auth.delete()
+    return Response(status=204)
