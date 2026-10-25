@@ -38,6 +38,7 @@ DJANGO_APPS = [
 
 THIRD_PARTY_APPS = [
     "rest_framework",
+    "rest_framework.authtoken",
     "corsheaders",
 ]
 
@@ -91,6 +92,9 @@ DATABASES = {
 }
 
 
+AUTH_USER_MODEL = "api.Usuario"
+
+
 # --- Validação de senhas ---------------------------------------------------
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -132,8 +136,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.TokenAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticatedOrReadOnly",

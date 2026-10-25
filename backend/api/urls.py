@@ -15,5 +15,6 @@ router = DefaultRouter()
 
 urlpatterns = [
     path("status/", views.status_api, name="status-api"),
+    path("login/", views.login, name="login"),
     path("", include(router.urls)),
 ]
