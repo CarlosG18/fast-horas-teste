@@ -1,0 +1,16 @@
+services:
+  web:
+    build: .
+    image: modelo-template
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      SQLITE_PATH: /app/data/db.sqlite3
+    volumes:
+      - dados_sqlite:/app/data
+    restart: unless-stopped
+
+volumes:
+  dados_sqlite:
