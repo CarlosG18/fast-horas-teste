@@ -10,7 +10,7 @@ class UsuarioManager(BaseUserManager):
     def create_user(self, email, password=None, **extra):
         if not email:
             raise ValueError("O e-mail é obrigatório.")
-        usuario = self.model(email=self.normalize_email(email), **extra)
+        usuario = self.model(email=email.strip().lower(), **extra)
         usuario.set_password(password)
         usuario.save(using=self._db)
         return usuario

@@ -63,3 +63,11 @@ class LoginTests(APITestCase):
 
         self.assertEqual(resposta.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(set(resposta.json()), {"email", "password"})
+
+    def test_email_em_caixa_mista_e_o_mesmo_login(self):
+        Usuario.objects.create_user("Gestor2@Empresa.com", self.SENHA, perfil=Usuario.Perfil.GESTOR)
+
+        self.assertEqual(Usuario.objects.filter(email="gestor2@empresa.com").count(), 1)
+        for email in ("gestor2@empresa.com", "GESTOR2@EMPRESA.COM", " Gestor2@Empresa.com "):
+            resposta = self.client.post(self.url, {"email": email, "password": self.SENHA})
+            self.assertEqual(resposta.status_code, status.HTTP_200_OK, email)

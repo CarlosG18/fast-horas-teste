@@ -10,6 +10,9 @@ class LoginSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(write_only=True, trim_whitespace=False)
 
+    def validate_email(self, valor):
+        return valor.strip().lower()
+
     def validate(self, attrs):
         # authenticate() devolve None para senha errada e para usuário inativo (RF-003),
         # com a mesma mensagem, para não revelar se o e-mail existe.
